@@ -1,0 +1,22 @@
+service: duplicate-checker
+frameworkVersion: "3"
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  stage: main
+  region: us-west-1
+  timeout: 900
+  memorySize: 2048
+
+functions:
+  api:
+    handler: index.handler
+    memorySize: 2048
+    events:
+      - httpApi: "*"
+    environment:
+      BROKER_SECRET_KEY: "ANY SECRET KEY"
+      SALES_SECRET_KEY: "ANY SECRET KEY"
+      MONGO_SALES_DB_URL: "DATABASE URL"
+      MONGO_BROKER_DB_URL: "DATABASE URL"
