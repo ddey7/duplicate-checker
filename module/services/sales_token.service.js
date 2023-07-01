@@ -35,8 +35,6 @@ const createCustomToken = async (data, expiresIn) => {
 
 //  cmnt: verify token after getting data
 const sales_verifyToken = (req) => {
-  console.log("sales_verifyToken");
-
   let token = "";
 
   //  cmnt: check if method is get or post
@@ -48,16 +46,11 @@ const sales_verifyToken = (req) => {
   } else {
     token = req.body.token;
   }
-  console.log(`🚀 ~ file: sales_token.service.js:50 ~ token:`, token);
 
   //  cmnt: check if the token is available or not
   if (token) {
     try {
       const verifiedToken = jwt.verify(token, secretKey);
-      console.log(
-        `🚀 ~ file: sales_token.service.js:56 ~ verifiedToken:`,
-        verifiedToken
-      );
 
       return {
         isVerified: true,

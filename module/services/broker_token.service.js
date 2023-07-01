@@ -46,16 +46,11 @@ const broker_verifyToken = (req) => {
   } else {
     token = req.body.token;
   }
-  console.log(`🚀 ~ file: broker_token.service.js:48 ~ token:`, token);
 
   //  cmnt: check if the token is available or not
   if (token) {
     try {
       const verifiedToken = jwt.verify(token, secretKey);
-      console.log(
-        `🚀 ~ file: broker_token.service.js:54 ~ verifiedToken:`,
-        verifiedToken
-      );
 
       return {
         isVerified: true,
