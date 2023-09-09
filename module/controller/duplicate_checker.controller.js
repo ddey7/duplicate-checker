@@ -2,54 +2,52 @@ const stringSimilarity = require("string-similarity");
 const mongoose = require("mongoose");
 var broker_url = process.env.MONGO_BROKER_DB_URL;
 var sales_url = process.env.MONGO_SALES_DB_URL;
-const {
-  QUESTIONS: Sales_Questions,
-} = require("../model/sales_questions.model");
+var safemlo_url = process.env.MONGO_SAFEMLO_DB_URL;
+const { SALES_QUESTION } = require("../model/sales_questions.model");
 const { BROKER_QUESTIONS } = require("../model/broker_questions.model");
 const { broker_verifyToken } = require("../services/broker_token.service");
 const { sales_verifyToken } = require("../services/sales_token.service");
+const { safemlo_verifyToken } = require("../services/safemlo_token.service");
+const { SAFEMLO_QUESTION } = require("../model/safemlo_questions.model");
 
 async function getQuestions(exam_type) {
   try {
-    let db_url =
-      exam_type === "broker"
-        ? broker_url
-        : exam_type === "salesperson"
-        ? sales_url
-        : null;
+    const collectionMapping = {
+      broker: BROKER_QUESTIONS,
+      salesperson: SALES_QUESTION,
+      safemlo: SAFEMLO_QUESTION,
+    };
+
+    const db_url = collectionMapping[exam_type];
+    if (!db_url) {
+      throw new Error("Invalid exam type");
+    }
 
     mongoose.set("strictQuery", false);
-    mongoose.connect(db_url, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
+    await mongoose.connect(db_url);
 
-    let QuestionCollection =
-      exam_type === "broker"
-        ? await BROKER_QUESTIONS.find({})
-        : exam_type === "salesperson"
-        ? await Sales_Questions.find({})
-        : [];
+    const QuestionCollection = await collectionMapping[exam_type].find({});
 
     return QuestionCollection;
   } catch (error) {
-    console.log(
-      `🚀 ~ file: duplicate_checker.controller.js:36 ~ getQuestions ~ error:`,
-      error
-    );
+    console.log("Error:", error);
     return [];
   }
 }
 
 class DuplicateChecker {
   async calculateDuplicate(req, res) {
-    let exam_type = req?.params?.exam_type;
-    const verifiedToken =
-      exam_type === "broker"
-        ? broker_verifyToken(req)
-        : exam_type === "salesperson"
-        ? sales_verifyToken(req)
-        : { isVerified: false };
+    const { exam_type } = req.params;
+
+    const verifyTokenFunctions = {
+      broker: broker_verifyToken,
+      salesperson: sales_verifyToken,
+      safemlo: safemlo_verifyToken,
+    };
+
+    const verifyToken =
+      verifyTokenFunctions[exam_type] || (() => ({ isVerified: false }));
+    const verifiedToken = verifyToken(req);
 
     if (verifiedToken.isVerified) {
       try {

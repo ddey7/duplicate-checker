@@ -1,4 +1,5 @@
 const { default: mongoose, Schema } = require("mongoose");
+const { ObjectId } = require("mongodb");
 
 const answerSchema = new Schema(
   {
@@ -25,10 +26,6 @@ const questionSchema = new Schema(
       type: String,
       required: [true, "Category Id is Required"],
     },
-    subCategoryId: {
-      type: String,
-      default: "null",
-    },
     answers: [answerSchema],
     solution: {
       type: String,
@@ -43,10 +40,10 @@ const questionSchema = new Schema(
 questionSchema.index({ question: "text", solution: "text" });
 
 // const AnswerOptions = mongoose.model("answers", answerSchema);
-const SALES_QUESTION = mongoose.model("Question", questionSchema);
-SALES_QUESTION.createIndexes();
+const SAFEMLO_QUESTION =
+  mongoose.model.Question || mongoose.model("Question", questionSchema);
+SAFEMLO_QUESTION.createIndexes();
 
 module.exports = {
-  SALES_QUESTION,
-  // AnswerOptions,
+  SAFEMLO_QUESTION,
 };
